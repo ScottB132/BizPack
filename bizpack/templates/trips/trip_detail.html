@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% block title %}— {{ trip.destination }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .trip-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--light);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .trip-meta-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--cream);
+    color: var(--navy);
+    border: 1px solid var(--light);
+  }
+
+  .progress-bar-wrap {
+    background: var(--light);
+    border-radius: 4px;
+    height: 8px;
+    margin: 1.5rem 0 0.5rem;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--gold), #e8b96e);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-label {
+    font-size: 0.85rem;
+    color: var(--grey);
+    margin-bottom: 2rem;
+  }
+
+  .progress-label strong { color: var(--navy); }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .category-card {
+    background: var(--white);
+    border-radius: 8px;
+    border: 1px solid var(--light);
+    padding: 1.25rem;
+  }
+
+  .category-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--navy);
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--light);
+  }
+
+  .packing-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--cream);
+    gap: 0.5rem;
+  }
+
+  .packing-item:last-child { border-bottom: none; }
+
+  .item-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    flex: 1;
+    font-size: 0.92rem;
+  }
+
+  .item-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--gold);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .item-name {
+    transition: all 0.2s;
+  }
+
+  .item-name.packed {
+    text-decoration: line-through;
+    color: var(--grey);
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: var(--light);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.25rem;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .delete-btn:hover { color: var(--red); }
+
+  .add-item-section {
+    background: var(--white);
+    border-radius: 8px;
+    border: 1px solid var(--light);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .add-item-form {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .add-item-form input, .add-item-form select {
+    padding: 0.6rem 0.9rem;
+    border: 1.5px solid var(--light);
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--navy);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .add-item-form input:focus,
+  .add-item-form select:focus { border-color: var(--gold); }
+
+  .add-item-form input { flex: 1; min-width: 180px; }
+
+  .danger-zone {
+    border-top: 1px solid var(--light);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="trip-header">
+  <div>
+    <h1>✈ {{ trip.destination }}</h1>
+    <div class="trip-meta-row">
+      <span class="badge">📅 {{ trip.departure_date|date:"d M" }} – {{ trip.return_date|date:"d M Y" }}</span>
+      <span class="badge">🌡 {{ trip.get_climate_display }}</span>
+      <span class="badge">👔 {{ trip.get_meeting_type_display }}</span>
+      <span class="badge">🌙 {{ trip.duration_nights }} night{{ trip.duration_nights|pluralize }}</span>
+    </div>
+  </div>
+  <a href="{% url 'trip_list' %}" class="btn btn-primary">← All Trips</a>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar-fill" id="progress-fill" style="width: {{ progress }}%"></div>
+</div>
+<div class="progress-label" id="progress-label">
+  <strong id="packed-count">{{ packed }}</strong> of <strong>{{ total }}</strong> items packed
+  {% if progress == 100 %}🎉 You're ready to go!{% endif %}
+</div>
+
+<!-- Add custom item -->
+<div class="add-item-section">
+  <h2 style="font-size:1rem; margin-bottom:0.75rem;">Add a Custom Item</h2>
+  <div class="add-item-form">
+    <input type="text" id="new-item-name" placeholder="e.g. Presentation clicker" />
+    <select id="new-item-category">
+      {% for cat in items_by_category.keys %}
+        <option>{{ cat.name }}</option>
+      {% endfor %}
+      <option>Other</option>
+    </select>
+    <button class="btn btn-gold" onclick="addItem()">Add Item</button>
+  </div>
+</div>
+
+<!-- Packing list by category -->
+<div class="categories-grid" id="categories-grid">
+  {% for category, items in items_by_category.items %}
+  <div class="category-card" id="cat-{{ category.pk }}">
+    <div class="category-title">{{ category.icon }} {{ category.name }}</div>
+    <div class="items-list" id="items-{{ category.pk }}">
+      {% for item in items %}
+      <div class="packing-item" id="item-row-{{ item.pk }}">
+        <label class="item-label">
+          <input type="checkbox"
+                 class="item-checkbox"
+                 {% if item.packed %}checked{% endif %}
+                 onchange="toggleItem({{ item.pk }}, this)">
+          <span class="item-name {% if item.packed %}packed{% endif %}" id="item-name-{{ item.pk }}">{{ item.name }}</span>
+        </label>
+        <button class="delete-btn" onclick="deleteItem({{ item.pk }})" title="Remove">✕</button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="danger-zone">
+  <form method="post" action="{% url 'trip_delete' trip.pk %}" onsubmit="return confirm('Delete this trip and its packing list?')">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger btn-sm">Delete Trip</button>
+  </form>
+</div>
+
+<script>
+  const CSRF = '{{ csrf_token }}';
+  let totalItems = {{ total }};
+  let packedItems = {{ packed }};
+
+  function updateProgress() {
+    const pct = totalItems > 0 ? Math.round((packedItems / totalItems) * 100) : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('packed-count').textContent = packedItems;
+    document.getElementById('progress-label').innerHTML =
+      `<strong>${packedItems}</strong> of <strong>${totalItems}</strong> items packed ${pct === 100 ? '🎉 You\'re ready to go!' : ''}`;
+  }
+
+  function toggleItem(pk, checkbox) {
+    const nameEl = document.getElementById('item-name-' + pk);
+    fetch(`/packing/item/${pk}/toggle/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.packed) {
+        nameEl.classList.add('packed');
+        packedItems++;
+      } else {
+        nameEl.classList.remove('packed');
+        packedItems--;
+      }
+      updateProgress();
+    });
+  }
+
+  function deleteItem(pk) {
+    fetch(`/packing/item/${pk}/delete/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF }
+    })
+    .then(r => r.json())
+    .then(() => {
+      const row = document.getElementById('item-row-' + pk);
+      const wasChecked = row.querySelector('input[type=checkbox]').checked;
+      row.remove();
+      totalItems--;
+      if (wasChecked) packedItems--;
+      updateProgress();
+    });
+  }
+
+  function addItem() {
+    const name = document.getElementById('new-item-name').value.trim();
+    const category = document.getElementById('new-item-category').value;
+    if (!name) return;
+
+    fetch(`/packing/trip/{{ trip.pk }}/add/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, category })
+    })
+    .then(r => r.json())
+    .then(data => {
+      // Find or create category card
+      let catCard = document.querySelector(`[data-cat-name="${data.category}"]`);
+      if (!catCard) {
+        catCard = document.createElement('div');
+        catCard.className = 'category-card';
+        catCard.setAttribute('data-cat-name', data.category);
+        catCard.innerHTML = `<div class="category-title">${data.icon} ${data.category}</div><div class="items-list"></div>`;
+        document.getElementById('categories-grid').appendChild(catCard);
+      }
+      const list = catCard.querySelector('.items-list');
+      list.insertAdjacentHTML('beforeend', `
+        <div class="packing-item" id="item-row-${data.id}">
+          <label class="item-label">
+            <input type="checkbox" class="item-checkbox" onchange="toggleItem(${data.id}, this)">
+            <span class="item-name" id="item-name-${data.id}">${data.name}</span>
+          </label>
+          <button class="delete-btn" onclick="deleteItem(${data.id})" title="Remove">✕</button>
+        </div>
+      `);
+      document.getElementById('new-item-name').value = '';
+      totalItems++;
+      updateProgress();
+    });
+  }
+
+  document.getElementById('new-item-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addItem();
+  });
+</script>
+{% endblock %}

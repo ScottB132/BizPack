@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BizPack {% block title %}{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0f1f3d;
+      --gold: #c8a96e;
+      --cream: #f8f5f0;
+      --white: #ffffff;
+      --grey: #6b7280;
+      --light: #e8e4de;
+      --green: #2d6a4f;
+      --red: #9b2335;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--navy);
+      min-height: 100vh;
+    }
+
+    nav {
+      background: var(--navy);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-family: 'DM Serif Display', serif;
+      color: var(--gold);
+      font-size: 1.5rem;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-brand span { color: var(--white); }
+
+    .nav-link {
+      color: var(--light);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(200,169,110,0.3);
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.2rem;
+      color: var(--navy);
+      margin-bottom: 0.25rem;
+    }
+
+    h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: var(--navy);
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.65rem 1.4rem;
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .btn-primary:hover { background: #1a3260; }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .btn-gold:hover { background: #b8965a; }
+
+    .btn-danger {
+      background: var(--red);
+      color: var(--white);
+    }
+
+    .btn-sm {
+      padding: 0.35rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 8px;
+      padding: 1.5rem;
+      border: 1px solid var(--light);
+      box-shadow: 0 1px 4px rgba(15,31,61,0.06);
+    }
+
+    .messages { margin-bottom: 1rem; }
+    .message {
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      background: #dbeafe;
+      color: #1e40af;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <nav>
+    <a href="{% url 'trip_list' %}" class="nav-brand">Biz<span>Pack</span></a>
+    <a href="{% url 'trip_create' %}" class="nav-link">+ New Trip</a>
+  </nav>
+
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

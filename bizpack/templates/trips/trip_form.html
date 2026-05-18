@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}— New Trip{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-wrap {
+    max-width: 560px;
+    margin: 2rem auto;
+  }
+
+  .form-header {
+    margin-bottom: 2rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid var(--light);
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--navy);
+    background: var(--white);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    align-items: center;
+  }
+
+  .ai-note {
+    background: var(--navy);
+    color: var(--cream);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .ai-note strong { color: var(--gold); }
+
+  .cancel-link {
+    color: var(--grey);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+
+  .cancel-link:hover { color: var(--navy); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+  <div class="form-header">
+    <h1>New Trip</h1>
+    <p style="color: var(--grey); margin-top: 0.25rem;">Fill in your trip details and Claude will build your packing list.</p>
+  </div>
+
+  <div class="ai-note">
+    ✨ <strong>AI Powered</strong> — Once you save, Claude will generate a personalised business packing list based on your destination, climate and meeting type.
+  </div>
+
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="id_destination">Destination</label>
+        {{ form.destination }}
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_departure_date">Departure Date</label>
+          {{ form.departure_date }}
+        </div>
+        <div class="form-group">
+          <label for="id_return_date">Return Date</label>
+          {{ form.return_date }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_climate">Climate</label>
+          {{ form.climate }}
+        </div>
+        <div class="form-group">
+          <label for="id_meeting_type">Meeting Type</label>
+          {{ form.meeting_type }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_notes">Extra Notes <span style="font-weight:300;text-transform:none;">(optional)</span></label>
+        {{ form.notes }}
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-gold">Generate Packing List ✈</button>
+        <a href="{% url 'trip_list' %}" class="cancel-link">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

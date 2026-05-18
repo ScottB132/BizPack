@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}— Delete Trip{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 3rem auto; text-align: center;">
+  <div class="card">
+    <div style="font-size: 2.5rem; margin-bottom: 1rem;">🗑</div>
+    <h2>Delete this trip?</h2>
+    <p style="color: var(--grey); margin: 0.75rem 0 1.5rem;">
+      <strong>{{ trip.destination }}</strong> ({{ trip.departure_date|date:"d M Y" }}) and all its packing items will be permanently removed.
+    </p>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+      </form>
+      <a href="{% url 'trip_detail' trip.pk %}" class="btn btn-primary">Cancel</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

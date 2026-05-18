@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}— My Trips{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--light);
+  }
+
+  .subtitle {
+    color: var(--grey);
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+  }
+
+  .trips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .trip-card {
+    background: var(--white);
+    border-radius: 8px;
+    border: 1px solid var(--light);
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.2s;
+    box-shadow: 0 1px 4px rgba(15,31,61,0.06);
+  }
+
+  .trip-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 16px rgba(15,31,61,0.1);
+    transform: translateY(-2px);
+  }
+
+  .trip-destination {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+
+  .trip-meta {
+    font-size: 0.85rem;
+    color: var(--grey);
+    margin-bottom: 1rem;
+  }
+
+  .trip-progress {
+    height: 4px;
+    background: var(--light);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.4rem;
+  }
+
+  .trip-progress-bar {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+
+  .trip-progress-label {
+    font-size: 0.78rem;
+    color: var(--grey);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--cream);
+    color: var(--navy);
+    border: 1px solid var(--light);
+    margin-right: 0.3rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--grey);
+  }
+
+  .empty-state h2 {
+    color: var(--grey);
+    font-family: 'DM Serif Display', serif;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>My Trips</h1>
+    <p class="subtitle">AI-powered packing lists for business travel</p>
+  </div>
+  <a href="{% url 'trip_create' %}" class="btn btn-gold">+ New Trip</a>
+</div>
+
+{% if trips %}
+  <div class="trips-grid">
+    {% for trip in trips %}
+      <a href="{% url 'trip_detail' trip.pk %}" class="trip-card">
+        <div class="trip-destination">✈ {{ trip.destination }}</div>
+        <div class="trip-meta">
+          {{ trip.departure_date|date:"d M" }} – {{ trip.return_date|date:"d M Y" }}
+          · {{ trip.duration_nights }} night{{ trip.duration_nights|pluralize }}
+        </div>
+        <div style="margin-bottom: 0.75rem;">
+          <span class="badge">{{ trip.get_climate_display }}</span>
+          <span class="badge">{{ trip.get_meeting_type_display }}</span>
+        </div>
+        <div class="trip-progress">
+          <div class="trip-progress-bar" style="width: 0%"></div>
+        </div>
+        <div class="trip-progress-label">{{ trip.items.count }} item{{ trip.items.count|pluralize }} to pack</div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🧳</div>
+    <h2>No trips yet</h2>
+    <p style="margin-bottom: 1.5rem;">Create your first trip and let AI build your packing list.</p>
+    <a href="{% url 'trip_create' %}" class="btn btn-gold">Plan your first trip</a>
+  </div>
+{% endif %}
+{% endblock %}

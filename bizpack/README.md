@@ -1,4 +1,4 @@
-# BizPack 🧳
+# BizPack 
 
 AI-powered business travel packing app built with Django + Claude.
 
